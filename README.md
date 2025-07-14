@@ -17,6 +17,7 @@ A simple Flask-based multi-user web application to manage vehicle parking lots. 
 2. Create & activate virtual environment (Windows):
 
     python -m venv venv
+    
     venv\Scripts\activate
 
 3. Install dependencies:
@@ -24,7 +25,6 @@ A simple Flask-based multi-user web application to manage vehicle parking lots. 
     pip install -r requirements.txt
 
 4. Run the app:
-
 
     python run.py
     App runs at: http://127.0.0.1:5000/
