@@ -1,0 +1,11 @@
+vehicle_venv/
+
+# SQLite database
+instance/*.db
+*.sqlite3
+
+# Byte-compiled / cache files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
