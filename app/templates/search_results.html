@@ -13,8 +13,11 @@
 <body>
 
     <h2>Search Results</h2>
-    <a href="{{ url_for('auth.home') }}">⬅ Back to Dashboard</a>
-
+   {% if session['role'] == 'admin' %}
+        <a class="btn-home" href="{{ url_for('auth.admin_dashboard') }}">← Back to Admin Dashboard</a>
+    {% else %}
+        <a class="btn-home" href="{{ url_for('auth.home') }}">← Back to Home</a>
+    {% endif %}
     {% if results %}
         <table>
             <thead>

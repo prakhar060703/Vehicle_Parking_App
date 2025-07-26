@@ -140,7 +140,7 @@ def create_lot():
 
 @auth_bp.route('/lot/<int:lot_id>/spots')
 def view_spots(lot_id):
-    if 'user_id' not in session or session.get('role') != 'admin':
+    if 'user_id' not in session:
         return redirect(url_for('auth.login'))
 
     lot = ParkingLot.query.get_or_404(lot_id)

@@ -1,87 +1,161 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Admin Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
     <style>
-        body { font-family: Arial; padding: 20px; background: #f2f2f2; }
-        h1 { color: #2c3e50; }
-        .container { display: flex; flex-wrap: wrap; gap: 20px; }
-        .card { background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.1); flex: 1; min-width: 300px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 8px 12px; border: 1px solid #ccc; text-align: left; }
-        .btn { padding: 6px 12px; margin: 5px 2px; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-block; }
-        .btn-primary { background: #3498db; color: white; }
-        .btn-danger { background: #e74c3c; color: white; }
-        .btn-secondary { background: #95a5a6; color: white; }
-        .btn-warning { background: #f39c12; color: white; }
-        .lot-card { margin-bottom: 10px; padding: 10px; background-color: #ecf0f1; border-radius: 5px; }
+      body {
+        font-family: Arial;
+        padding: 20px;
+        background: #f2f2f2;
+      }
+      h1 {
+        color: #2c3e50;
+      }
+      .container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+      .card {
+        background: #fff;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        flex: 1;
+        min-width: 300px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+      }
+      th,
+      td {
+        padding: 8px 12px;
+        border: 1px solid #ccc;
+        text-align: left;
+      }
+      .btn {
+        padding: 6px 12px;
+        margin: 5px 2px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+      }
+      .btn-primary {
+        background: #3498db;
+        color: white;
+      }
+      .btn-danger {
+        background: #e74c3c;
+        color: white;
+      }
+      .btn-secondary {
+        background: #95a5a6;
+        color: white;
+      }
+      .btn-warning {
+        background: #f39c12;
+        color: white;
+      }
+      .lot-card {
+        margin-bottom: 10px;
+        padding: 10px;
+        background-color: #ecf0f1;
+        border-radius: 5px;
+      }
     </style>
-</head>
-<body>
-
+  </head>
+  <body>
     <h1>Welcome Admin, {{ session['username'] }}</h1>
     <div>
-        <a href="{{ url_for('auth.logout') }}" class="btn btn-danger">Logout</a>
-        <a href="{{ url_for('auth.create_lot') }}" class="btn btn-primary">+ Add Parking Lot</a>
+      <a href="{{ url_for('auth.logout') }}" class="btn btn-danger">Logout</a>
+      <a href="{{ url_for('auth.create_lot') }}" class="btn btn-primary"
+        >+ Add Parking Lot</a
+      >
     </div>
 
     <div class="container">
+      <!-- Parking Lots -->
+      <div class="card">
+        <h2>Parking Lots</h2>
+        {% for lot in lots %}
+        <div class="lot-card">
+          <strong>{{ lot.prime_location_name }}</strong> (₹{{ lot.price
+          }}/hr)<br />
+          Address: {{ lot.address }}<br />
+          Pin: {{ lot.pin_code }}<br />
+          Spots: {{ lot.max_spots }}<br />
+          <a
+            href="{{ url_for('auth.view_spots', lot_id=lot.id) }}"
+            class="btn btn-secondary"
+            >View Spots</a
+          >
+          <a
+            href="{{ url_for('auth.edit_lot', lot_id=lot.id) }}"
+            class="btn btn-warning"
+            >Edit</a
+          >
+        </div>
+        {% else %}
+        <p>No parking lots available.</p>
+        {% endfor %}
+      </div>
 
-        <!-- Parking Lots -->
-        <div class="card">
-            <h2>Parking Lots</h2>
-            {% for lot in lots %}
-                <div class="lot-card">
-                    <strong>{{ lot.prime_location_name }}</strong> (₹{{ lot.price }}/hr)<br>
-                    Address: {{ lot.address }}<br>
-                    Pin: {{ lot.pin_code }}<br>
-                    Spots: {{ lot.max_spots }}<br>
-                    <a href="{{ url_for('auth.view_spots', lot_id=lot.id) }}" class="btn btn-secondary">View Spots</a>
-                    <a href="{{ url_for('auth.edit_lot', lot_id=lot.id) }}" class="btn btn-warning">Edit</a>
-                </div>
-            {% else %}
-                <p>No parking lots available.</p>
+      <!-- Registered Users -->
+      <div class="card">
+        <h2>Registered Users</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Username</th>
+              <th>Role</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in users %}
+            <tr>
+              <td>{{ user.id }}</td>
+              <td>{{ user.username }}</td>
+              <td>{{ user.role }}</td>
+            </tr>
             {% endfor %}
-        </div>
+          </tbody>
+        </table>
+      </div>
 
-        <!-- Registered Users -->
-        <div class="card">
-            <h2>Registered Users</h2>
-            <table>
-                <thead>
-                    <tr><th>ID</th><th>Username</th><th>Role</th></tr>
-                </thead>
-                <tbody>
-                    {% for user in users %}
-                        <tr>
-                            <td>{{ user.id }}</td>
-                            <td>{{ user.username }}</td>
-                            <td>{{ user.role }}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+      <!-- Search -->
+      <div class="card">
+        <h2>Search Parking Lots</h2>
+        <form method="POST" action="{{ url_for('auth.search_lots') }}">
+          <div class="search-container">
+            <input
+              class="search-input"
+              type="text"
+              name="search"
+              placeholder="Search by location..."
+              required
+            />
+            <button class="search-button" type="submit">Search</button>
+          </div>
+        </form>
+      </div>
 
-        <!-- Search -->
-        <div class="card">
-            <h2>Search Parking Lots</h2>
-            <form action="{{ url_for('auth.admin_dashboard') }}" method="GET">
-                <input type="text" name="q" placeholder="Search by location or pin..." required>
-                <button class="btn btn-secondary" type="submit">Search</button>
-            </form>
-        </div>
-
-        <!-- Summary -->
-        <div class="card">
-            <h2>Summary</h2>
-            <p>Total Lots: {{ lots|length }}</p>
-            <p>Total Users: {{ users|length }}</p>
-            <p>Total Reservations: {{ reservations|length }}</p>
-        </div>
-
+      <!-- Summary -->
+      <div class="card">
+        <h2>Summary</h2>
+        <p>Total Lots: {{ lots|length }}</p>
+        <p>Total Users: {{ users|length }}</p>
+        <p>Total Reservations: {{ reservations|length }}</p>
+      </div>
     </div>
-</body>
+  </body>
 </html>

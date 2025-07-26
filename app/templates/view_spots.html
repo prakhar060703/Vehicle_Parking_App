@@ -1,4 +1,3 @@
-<!-- templates/view_spots.html -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -21,10 +20,28 @@
         }
         .available { background-color: green; }
         .occupied { background-color: grey; }
+
+        .btn-home {
+            background-color: #2c3e50;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
+    <!-- Back Button -->
+    {% if session['role'] == 'admin' %}
+        <a class="btn-home" href="{{ url_for('auth.admin_dashboard') }}">← Back to Admin Dashboard</a>
+    {% else %}
+        <a class="btn-home" href="{{ url_for('auth.home') }}">← Back to Home</a>
+    {% endif %}
+
     <h2>Parking Spots for {{ lot.prime_location_name }}</h2>
+
     <div class="spot-grid">
         {% for spot in spots %}
             <a href="{{ url_for('auth.reserve_spot', spot_id=spot.id) }}">
