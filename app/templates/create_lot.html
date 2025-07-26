@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head><title>Create Parking Lot</title></head>
+<body>
+    <h1>Create Parking Lot</h1>
+    <form method="POST">
+        Name: <input type="text" name="name" required><br>
+        Price: <input type="number" name="price" step="0.01" required><br>
+        Address: <input type="text" name="address" required><br>
+        Pin Code: <input type="text" name="pin_code" required><br>
+        Max Spots: <input type="number" name="max_spots" required><br>
+        <input type="submit" value="Create Lot">
+    </form>
+    <a href="{{ url_for('auth.admin_dashboard') }}">Back to Dashboard</a>
+</body>
+</html>

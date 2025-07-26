@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Reservation Details</title>
+</head>
+<body>
+    <h2>Reservation Details</h2>
+    <p><strong>Spot ID:</strong> {{ reservation.spot.id }}</p>
+    <p><strong>Lot:</strong> {{ reservation.spot.lot.prime_location_name }}</p>
+    <p><strong>Start Time:</strong> {{ reservation.parking_timestamp }}</p>
+    <p><strong>Leaving Time:</strong> {{ reservation.leaving_timestamp }}</p>
+    <p><strong>Cost/hr:</strong> ₹{{ reservation.cost_per_hour }}</p>
+    <a href="{{ url_for('auth.home') }}">Back</a>
+</body>
+</html>

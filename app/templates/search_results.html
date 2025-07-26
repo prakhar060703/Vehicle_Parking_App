@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search Results</title>
+    <style>
+        body { font-family: Arial; background: #f4f4f4; padding: 20px; }
+        h2 { color: #2c3e50; }
+        table { width: 100%; border-collapse: collapse; background: white; margin-top: 20px; }
+        th, td { padding: 12px; border: 1px solid #ccc; text-align: left; }
+        .btn-book { background: #2ecc71; color: white; padding: 6px 10px; border: none; border-radius: 4px; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+    <h2>Search Results</h2>
+    <a href="{{ url_for('auth.home') }}">⬅ Back to Dashboard</a>
+
+    {% if results %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Lot ID</th>
+                    <th>Location</th>
+                    <th>Address</th>
+                    <th>Available Spots</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for lot in results %}
+                    <tr>
+                        <td>{{ lot.id }}</td>
+                        <td>{{ lot.location }}</td>
+                        <td>{{ lot.address }}</td>
+                        <td>{{ lot.available }}</td>
+                        <td>
+                            {% if lot.available > 0 %}
+                                <a class="btn-book" href="{{url_for('auth.view_spots', lot_id=lot.id) }}">Book</a>
+                            {% else %}
+                                <span style="color: gray;">Full</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No matching locations found.</p>
+    {% endif %}
+
+</body>
+</html>

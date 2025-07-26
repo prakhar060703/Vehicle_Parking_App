@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Reservation Details - Admin View</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f2f2;
+            padding: 40px;
+        }
+        .container {
+            background: #fff;
+            border-radius: 8px;
+            padding: 30px;
+            max-width: 600px;
+            margin: auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #2c3e50;
+        }
+        p {
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        a.button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 15px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        a.button:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Reservation Details (Admin View)</h2>
+        <p><strong>Spot ID:</strong> {{ spot.id }}</p>
+        <p><strong>Lot Name:</strong> {{ spot.lot.prime_location_name }}</p>
+        <p><strong>User:</strong> {{ reservation.user.username }}</p>
+        <p><strong>Start Time:</strong> {{ reservation.parking_timestamp }}</p>
+        <p><strong>Leaving Time:</strong> {{ reservation.leaving_timestamp }}</p>
+        <p><strong>Cost/hr:</strong> ₹{{ reservation.cost_per_hour }}</p>
+
+        <a href="{{ url_for('auth.edit_reservation', reservation_id=reservation.id) }}" class="button">Edit Reservation</a>
+        <a href="{{ url_for('auth.view_spots', lot_id=spot.lot_id) }}" class="button" style="background-color: #95a5a6;">Back to Spot View</a>
+    </div>
+</body>
+</html>

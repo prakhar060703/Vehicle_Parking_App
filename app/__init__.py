@@ -26,6 +26,15 @@ def create_app():
         from .models import models
         db.create_all()
 
+        from .models.models import User
+        admin = User.query.filter_by(role='admin').first()
+        if not admin:
+            default_admin = User(username='admin', password='admin123', role='admin')
+            db.session.add(default_admin)
+            db.session.commit()
+            print("✔️ Default admin user created: username='admin', password='admin123'")
+
+
     # Flask uses something called an "application context" to keep track of which app is currently running.
     # Some operations (like database access) only work inside this context.
     # db.create_all()

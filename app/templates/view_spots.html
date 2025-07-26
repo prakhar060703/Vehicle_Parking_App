@@ -1,0 +1,38 @@
+<!-- templates/view_spots.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Parking Spots</title>
+    <style>
+        .spot-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .spot {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            line-height: 50px;
+            color: white;
+            font-weight: bold;
+        }
+        .available { background-color: green; }
+        .occupied { background-color: grey; }
+    </style>
+</head>
+<body>
+    <h2>Parking Spots for {{ lot.prime_location_name }}</h2>
+    <div class="spot-grid">
+        {% for spot in spots %}
+            <a href="{{ url_for('auth.reserve_spot', spot_id=spot.id) }}">
+                <div class="spot {{ 'available' if spot.status == 'A' else 'occupied' }}">
+                    {{ loop.index }}
+                </div>
+            </a>
+        {% endfor %}
+    </div>
+</body>
+</html>
