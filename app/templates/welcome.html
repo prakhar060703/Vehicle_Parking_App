@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f9fafb;
+  }
+
+  .container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+  }
+
+  .landing-box {
+    margin-top: -100px;
+    max-width: 700px;
+    text-align: center;
+    background-color: white;
+    padding: 40px 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  }
+
+  .landing-box h1 {
+    font-size: 36px;
+    color: #1f2937;
+    margin-bottom: 20px;
+  }
+
+  .landing-box p {
+    font-size: 18px;
+    color: #4b5563;
+    margin-bottom: 30px;
+  }
+
+  .btn-group {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+  }
+
+  .btn {
+    padding: 12px 28px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.3s ease;
+  }
+
+  .btn-login {
+    background-color: #2563eb;
+    color: white;
+  }
+
+  .btn-login:hover {
+    background-color: #1d4ed8;
+  }
+
+  .btn-signup {
+    background-color: #e5e7eb;
+    color: #1f2937;
+  }
+
+  .btn-signup:hover {
+    background-color: #d1d5db;
+  }
+</style>
+
+<div class="container">
+  <div class="landing-box">
+    <h1>Welcome to SmartPark</h1>
+    <p>
+      Effortless parking reservations, real-time availability, and smooth management — all in one place.
+    </p>
+    <div class="btn-group">
+      <a href="{{ url_for('auth.login') }}" class="btn btn-login">Login</a>
+      <a href="{{ url_for('auth.signup') }}" class="btn btn-signup">Create Account</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -7,7 +7,11 @@ auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/')
 def index():
-    return redirect(url_for('auth.login'))
+    return redirect(url_for('auth.welcome'))
+
+@auth_bp.route('/welcome')
+def welcome():
+    return render_template('welcome.html')
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
