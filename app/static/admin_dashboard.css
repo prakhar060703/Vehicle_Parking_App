@@ -1,0 +1,214 @@
+/* Base reset & body */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, #f0f2f5, #e9ecf1);
+  color: #2d3436;
+}
+
+/* Wrapper */
+.dashboard-wrapper {
+  width: 80%;
+  margin: 40px auto;
+  padding: 20px 30px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.08);
+}
+
+/* Heading */
+h1 {
+  font-size: 36px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 40px;
+  color: #2d3436;
+  letter-spacing: 0.5px;
+}
+
+/* Top bar controls */
+.top-controls {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-bottom: 30px;
+}
+
+/* Main content structure */
+.dashboard-content {
+  display: flex;
+  flex-direction: column;
+  gap: 35px;
+}
+
+/* Card container */
+.card {
+  background: #ffffff;
+  padding: 25px 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  transition: all 0.25s ease;
+}
+
+.card:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* Parking lot info block */
+.lot-card {
+  background-color: #f6f9fc;
+  padding: 18px;
+  border-radius: 8px;
+  margin-bottom: 14px;
+  border: 1px solid #e0e6ed;
+  line-height: 1.7;
+}
+
+/* Table styles */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 20px;
+}
+
+th,
+td {
+  border-bottom: 1px solid #e5e8ed;
+  padding: 14px;
+  text-align: left;
+  font-size: 14px;
+}
+
+th {
+  background-color: #f9fbfd;
+  font-weight: 600;
+  color: #34495e;
+}
+
+/* Buttons */
+.btn {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn:hover {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary {
+  background-color: #3498db;
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background-color: #2980b9;
+}
+
+.btn-danger {
+  background-color: #e74c3c;
+  color: #fff;
+}
+
+.btn-danger:hover {
+  background-color: #c0392b;
+}
+
+.btn-secondary {
+  background-color: #95a5a6;
+  color: #fff;
+}
+
+.btn-secondary:hover {
+  background-color: #7f8c8d;
+}
+
+.btn-warning {
+  background-color: #f39c12;
+  color: #fff;
+}
+
+.btn-warning:hover {
+  background-color: #d68910;
+}
+
+/* Flash messages */
+.flash-message {
+  padding: 14px 18px;
+  margin-bottom: 25px;
+  border-radius: 6px;
+  font-weight: 600;
+  text-align: center;
+  font-size: 14px;
+  opacity: 1;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.flash-success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.flash-danger {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.flash-info {
+  background-color: #d1ecf1;
+  color: #0c5460;
+  border: 1px solid #bee5eb;
+}
+
+/* Search input */
+.search-container {
+  display: flex;
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.search-input {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid #dcdde1;
+  font-size: 15px;
+  transition: border-color 0.2s ease;
+}
+
+.search-input:focus {
+  border-color: #3498db;
+  outline: none;
+}
+
+#summaryChart {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .dashboard-wrapper {
+    width: 90%;
+    padding: 20px 15px;
+  }
+
+  .top-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-container {
+    flex-direction: column;
+  }
+}

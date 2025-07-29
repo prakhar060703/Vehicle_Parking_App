@@ -10,6 +10,9 @@
     <p><strong>Start Time:</strong> {{ reservation.parking_timestamp }}</p>
     <p><strong>Leaving Time:</strong> {{ reservation.leaving_timestamp }}</p>
     <p><strong>Cost/hr:</strong> ₹{{ reservation.cost_per_hour }}</p>
-    <a href="{{ url_for('auth.home') }}">Back</a>
+   <a href="{% if session['role'] == 'admin' %}{{ url_for('auth.admin_dashboard') }}{% else %}{{ url_for('auth.home') }}{% endif %}">
+  Back
+</a>
+
 </body>
 </html>

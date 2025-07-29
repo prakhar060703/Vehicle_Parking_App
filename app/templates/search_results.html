@@ -26,6 +26,7 @@
                     <th>Location</th>
                     <th>Address</th>
                     <th>Available Spots</th>
+                    <th>Price Per Hour</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -36,6 +37,7 @@
                         <td>{{ lot.location }}</td>
                         <td>{{ lot.address }}</td>
                         <td>{{ lot.available }}</td>
+                        <td>{{ lot.price }}</td>
                         <td>
                             {% if lot.available > 0 %}
                                 <a class="btn-book" href="{{url_for('auth.view_spots', lot_id=lot.id) }}">Book</a>

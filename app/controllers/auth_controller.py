@@ -100,7 +100,7 @@ def admin_dashboard():
     lots = ParkingLot.query.all()
     users = User.query.filter_by(role='user').all()
     reservations = Reservation.query.all()
-
+    
     return render_template(
         'admin_dashboard.html',
         lots=lots,
@@ -241,6 +241,34 @@ def search_lots():
                     'id': lot.id,
                     'location': lot.prime_location_name,
                     'address': lot.address,
-                    'available': available_spots
+                    'available': available_spots,
+                    'price':lot.price
                 })
     return render_template('search_results.html', results=results, username=session.get('username'))
+
+
+@auth_bp.route('/delete_lot/<int:lot_id>', methods=['POST'])
+def delete_lot(lot_id):
+    lot = ParkingLot.query.get_or_404(lot_id)
+
+    # Check if any spot in the lot has an active reservation
+    reserved_spots = (
+        db.session.query(Reservation)
+        .join(ParkingSpot)
+        .filter(ParkingSpot.lot_id == lot_id)
+        .first()
+    )
+
+    if reserved_spots:
+        flash('Cannot delete: Some spots in this lot have active reservations.', 'danger')
+        return redirect(url_for('auth.admin_dashboard'))
+
+    # Delete spots first (if using cascade, this may not be needed)
+    for spot in lot.spots:
+        db.session.delete(spot)
+
+    # Delete the lot
+    db.session.delete(lot)
+    db.session.commit()
+    flash('Parking lot deleted successfully!', 'success')
+    return redirect(url_for('auth.admin_dashboard'))

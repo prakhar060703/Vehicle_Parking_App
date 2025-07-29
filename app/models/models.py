@@ -33,3 +33,5 @@ class Reservation(db.Model):
     parking_timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     leaving_timestamp = db.Column(db.DateTime, nullable=True)
     cost_per_hour = db.Column(db.Float, nullable=False)
+    
+
