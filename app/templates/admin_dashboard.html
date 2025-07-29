@@ -10,40 +10,59 @@
   </head>
   <body>
     <div class="dashboard-wrapper">
-      <h1>Welcome Admin, {{ session['username'] }}</h1>
+      <h1>Welcome {{ session['name'] }}</h1>
 
       <!-- Flash Messages -->
-      {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %}
       <div id="flash-container">
         {% for category, message in messages %}
         <div class="flash-message flash-{{ category }}">{{ message }}</div>
         {% endfor %}
       </div>
-      {% endif %}
-      {% endwith %}
+      {% endif %} {% endwith %}
 
       <!-- Top Controls -->
       <div class="top-controls">
-        <a href="{{ url_for('auth.create_lot') }}" class="btn btn-primary">+ Add Parking Lot</a>
+        <a href="{{ url_for('auth.create_lot') }}" class="btn btn-primary"
+          >+ Add Parking Lot</a
+        >
         <a href="{{ url_for('auth.logout') }}" class="btn btn-danger">Logout</a>
       </div>
 
       <div class="dashboard-content">
-
         <!-- Section: Parking Lots -->
         <section class="card">
           <h2>Parking Lots</h2>
           {% for lot in lots %}
           <div class="lot-card">
-            <strong>{{ lot.prime_location_name }}</strong> (₹{{ lot.price }}/hr)<br />
+            <strong>{{ lot.prime_location_name }}</strong> (₹{{ lot.price
+            }}/hr)<br />
             Address: {{ lot.address }}<br />
             Pin: {{ lot.pin_code }}<br />
             Spots: {{ lot.max_spots }}<br />
-            <a href="{{ url_for('auth.view_spots', lot_id=lot.id) }}" class="btn btn-secondary">View Spots</a>
-            <a href="{{ url_for('auth.edit_lot', lot_id=lot.id) }}" class="btn btn-warning">Edit</a>
-            <form method="POST" action="{{ url_for('auth.delete_lot', lot_id=lot.id) }}" style="display:inline;">
-              <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this lot?');">Delete</button>
+            <a
+              href="{{ url_for('auth.view_spots', lot_id=lot.id) }}"
+              class="btn btn-secondary"
+              >View Spots</a
+            >
+            <a
+              href="{{ url_for('auth.edit_lot', lot_id=lot.id) }}"
+              class="btn btn-warning"
+              >Edit</a
+            >
+            <form
+              method="POST"
+              action="{{ url_for('auth.delete_lot', lot_id=lot.id) }}"
+              style="display: inline"
+            >
+              <button
+                type="submit"
+                class="btn btn-danger"
+                onclick="return confirm('Are you sure you want to delete this lot?');"
+              >
+                Delete
+              </button>
             </form>
           </div>
           {% else %}
@@ -56,14 +75,22 @@
           <h2>Registered Users</h2>
           <table>
             <thead>
-              <tr><th>ID</th><th>Username</th><th>Role</th></tr>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Pin Code</th>
+                <th>Address</th>
+              </tr>
             </thead>
             <tbody>
               {% for user in users %}
               <tr>
                 <td>{{ user.id }}</td>
-                <td>{{ user.username }}</td>
-                <td>{{ user.role }}</td>
+                <td>{{ user.name }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.pin_code }}</td>
+                <td>{{ user.address }}</td>
               </tr>
               {% endfor %}
             </tbody>
@@ -75,7 +102,13 @@
           <h2>Search Parking Lots</h2>
           <form method="POST" action="{{ url_for('auth.search_lots') }}">
             <div class="search-container">
-              <input type="text" name="search" class="search-input" placeholder="Search by location..." required />
+              <input
+                type="text"
+                name="search"
+                class="search-input"
+                placeholder="Search "
+                required
+              />
               <button type="submit" class="btn btn-primary">Search</button>
             </div>
           </form>
@@ -87,19 +120,61 @@
           {% if reservations %}
           <table>
             <thead>
-              <tr><th>User</th><th>Spot ID</th><th>Location</th><th>Start</th><th>Leaving</th><th>Actions</th></tr>
+              <tr>
+                <th>User</th>
+                <th>Spot ID</th>
+                <th>Location</th>
+                <th>Booking Timestamp</th>
+                <th>Expected Leaving Timestamp</th>
+                <th>Expected Cost</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
             </thead>
             <tbody>
               {% for r in reservations %}
               <tr>
-                <td>{{ r.user.username }}</td>
+                <td>{{ r.user.name }}</td>
                 <td>{{ r.spot.id }}</td>
                 <td>{{ r.spot.lot.prime_location_name }}</td>
-                <td>{{ r.parking_timestamp }}</td>
-                <td>{{ r.leaving_timestamp }}</td>
+                <td>{{ r.parking_timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
                 <td>
-                  <a href="{{ url_for('auth.view_reservation', reservation_id=r.id) }}" class="btn btn-secondary">View</a>
-                  <a href="{{ url_for('auth.delete_reservation', reservation_id=r.id) }}" class="btn btn-danger">Release</a>
+                  {{ r.expected_leaving_timestamp.strftime('%Y-%m-%d %H:%M') }}
+                </td>
+
+                <!-- Expected Cost -->
+                <td>
+                  ₹{{ ( ( (r.actual_leaving_timestamp if
+                  r.actual_leaving_timestamp and r.actual_leaving_timestamp >
+                  r.expected_leaving_timestamp else
+                  r.expected_leaving_timestamp) - r.parking_timestamp
+                  ).total_seconds() / 3600 ) * r.cost_per_hour | round(2) }}
+                </td>
+
+                <!-- Overdue or Completed Status -->
+                <td>
+                  {% if r.actual_leaving_timestamp %} {% if
+                  r.actual_leaving_timestamp <= r.expected_leaving_timestamp %}
+                  Released {% else %} Released(Late) {% endif %} {% else %}
+                  ⏳Active {% endif %}
+                </td>
+
+                <!-- Actions -->
+                <td>
+                  <a
+                    href="{{ url_for('auth.view_reservation', reservation_id=r.id) }}"
+                    class="btn btn-secondary"
+                    >View</a
+                  >
+
+                  {% if not r.actual_leaving_timestamp %}
+                  <a
+                    href="{{ url_for('auth.delete_reservation', reservation_id=r.id) }}"
+                    class="btn btn-danger"
+                    style="display: inline-block; margin-top: 12px"
+                    >Release</a
+                  >
+                  {% endif %}
                 </td>
               </tr>
               {% endfor %}
@@ -110,23 +185,19 @@
           {% endif %}
         </section>
 
-          <!-- Section: Summary -->
-    <section class="card">
-      <h2>Summary</h2>
-      <script id="summary-data" type="application/json">
-          {
-            "lots": {{ lots|length }},
-            "users": {{ users|length }},
-            "reservations": {{ reservations|length }}
-          }
-        </script>
-      <!-- Chart Canvas -->
-      <canvas id="summaryChart" width="300" height="300"></canvas>
-      
-      
-    </section>
-
-
+        <!-- Section: Summary -->
+        <section class="card">
+          <h2>Summary</h2>
+          <script id="summary-data" type="application/json">
+            {
+              "lots": {{ lots|length }},
+              "users": {{ users|length }},
+              "reservations": {{ reservations|length }}
+            }
+          </script>
+          <!-- Chart Canvas -->
+          <canvas id="summaryChart" width="300" height="300"></canvas>
+        </section>
       </div>
     </div>
 
@@ -143,12 +214,9 @@
     </script>
 
     <!-- Chart.js library -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<!-- Your external chart logic -->
-<script src="{{ url_for('static', filename='js/summary_chart.js') }}"></script>
-
-
-    
+    <!-- Your external chart logic -->
+    <script src="{{ url_for('static', filename='js/summary_chart.js') }}"></script>
   </body>
 </html>

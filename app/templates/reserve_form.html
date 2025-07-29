@@ -1,16 +1,25 @@
 <h2>Reserve Spot {{ spot.id }} in {{ spot.lot.prime_location_name }}</h2>
+
 <form method="POST">
     {% if users %}
-        <label>Select User:</label>
-        <select name="user_id">
+        <label for="user_id">Select User:</label>
+        <select name="user_id" id="user_id" required>
             {% for user in users %}
-                <option value="{{ user.id }}">{{ user.username }}</option>
+                <option value="{{ user.id }}">{{ user.name }}</option>
             {% endfor %}
-        </select><br>
+        </select><br><br>
     {% else %}
         <input type="hidden" name="user_id" value="{{ session['user_id'] }}">
     {% endif %}
-    <label>Number of Hours:</label>
-    <input type="number" name="hours" min="1" required><br>
+
+    <label for="vehicle_number">Vehicle Number:</label>
+    <input type="text" name="vehicle_number" id="vehicle_number" required><br><br>
+    
+    <label for="booking_time">Booking Start Time:</label>
+    <input type="datetime-local" name="booking_time" id="booking_time" required><br><br>
+
+    <label for="duration">Duration (in hours):</label>
+    <input type="number" name="duration" id="duration" step="0.5" min="0.5" required><br><br>
+
     <button type="submit">Reserve</button>
 </form>

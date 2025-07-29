@@ -1,60 +1,106 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
+    <meta charset="UTF-8" />
     <title>User Dashboard</title>
     <style>
       body {
-        font-family: Arial;
-        background: #f4f4f4;
-        padding: 20px;
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        padding: 30px;
+        margin: 0;
       }
-      h2 {
-        color: #2c3e50;
-      }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-        background: white;
-      }
-      th,
-      td {
-        padding: 12px;
-        border: 1px solid #ccc;
-        text-align: left;
-      }
-      .btn {
-        padding: 6px 10px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        text-decoration: none;
-      }
-      .btn-view {
-        background: #3498db;
-        color: white;
-      }
-      .btn-delete {
-        background: #e74c3c;
-        color: white;
-      }
-      .btn-logout {
-        background: #2c3e50;
-        color: white;
-        float: right;
-      }
+
       .top-bar {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 20px;
+        background-color: #ffffff;
+        padding: 15px 25px;
+        border-radius: 6px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
       }
+
+      .top-bar h2 {
+        color: #2c3e50;
+        margin: 0;
+      }
+
+      .top-bar p {
+        margin: 0;
+        font-size: 14px;
+        color: #555;
+      }
+
+      .btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        text-decoration: none;
+        cursor: pointer;
+        font-size: 14px;
+      }
+
+      .btn-view {
+        background-color: #3498db;
+        color: white;
+      }
+
+      .btn-view:hover {
+        background-color: #2980b9;
+      }
+
+      .btn-delete {
+        background-color: #e74c3c;
+        color: white;
+      }
+
+      .btn-delete:hover {
+        background-color: #c0392b;
+      }
+
+      .btn-logout {
+        background-color: #2c3e50;
+        color: white;
+      }
+
+      .btn-logout:hover {
+        background-color: #1a252f;
+      }
+
+      h3,
+      .search-heading {
+        color: #2c3e50;
+        margin-top: 30px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: white;
+        margin-top: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+
+      th,
+      td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+      }
+
+      th {
+        background-color: #ecf0f1;
+        color: #2c3e50;
+      }
+
       .search-container {
         display: flex;
         justify-content: center;
         align-items: center;
-        margin-bottom: 20px;
         gap: 10px;
+        margin-top: 15px;
       }
 
       .search-input {
@@ -86,19 +132,19 @@
       .search-button:hover {
         background-color: #2980b9;
       }
-      .search-heading {
-        margin-top: 40px;
-        text-align: center;
-        color: #2c3e50;
-        font-size: 24px;
-        margin-bottom: 15px;
-        font-weight: bold;
-    }
+
+      .actions a {
+        display: inline-block;
+        margin: 4px 0;
+      }
     </style>
   </head>
   <body>
     <div class="top-bar">
-      <h2>Welcome, {{ username }}</h2>
+      <div>
+        <h2>Welcome, {{ name }}</h2>
+        <p>Email: {{ email }}</p>
+      </div>
       <a class="btn btn-logout" href="{{ url_for('auth.logout') }}">Logout</a>
     </div>
 
@@ -107,31 +153,48 @@
     <table>
       <thead>
         <tr>
+          <th>User</th>
           <th>Spot ID</th>
           <th>Location</th>
-          <th>Start Time</th>
-          <th>Leaving Time</th>
+          <th>Booking Time</th>
+          <th>Expected Leaving</th>
+          <th>Expected Cost</th>
+          <th>Status</th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody>
         {% for r in reservations %}
         <tr>
+          <td>{{ r.user.name }}</td>
           <td>{{ r.spot.id }}</td>
           <td>{{ r.spot.lot.prime_location_name }}</td>
-          <td>{{ r.parking_timestamp }}</td>
-          <td>{{ r.leaving_timestamp }}</td>
+          <td>{{ r.parking_timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+          <td>{{ r.expected_leaving_timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
           <td>
-            <a
-              class="btn btn-view"
-              href="{{ url_for('auth.view_reservation', reservation_id=r.id) }}"
-              >View</a
-            >
-            <a
-              class="btn btn-delete"
-              href="{{ url_for('auth.delete_reservation', reservation_id=r.id) }}"
-              >Release</a
-            >
+            ₹{{
+              (
+                ((r.actual_leaving_timestamp if r.actual_leaving_timestamp and r.actual_leaving_timestamp > r.expected_leaving_timestamp else r.expected_leaving_timestamp) - r.parking_timestamp).total_seconds()
+                / 3600
+              ) * r.cost_per_hour | round(2)
+            }}
+          </td>
+          <td>
+            {% if r.actual_leaving_timestamp %}
+              {% if r.actual_leaving_timestamp <= r.expected_leaving_timestamp %}
+                Released
+              {% else %}
+                Released (Late)
+              {% endif %}
+            {% else %}
+              ⏳ Active
+            {% endif %}
+          </td>
+          <td class="actions">
+            <a href="{{ url_for('auth.view_reservation', reservation_id=r.id) }}" class="btn btn-view">View</a>
+            {% if not r.actual_leaving_timestamp %}
+            <a href="{{ url_for('auth.delete_reservation', reservation_id=r.id) }}" class="btn btn-delete">Release</a>
+            {% endif %}
           </td>
         </tr>
         {% endfor %}

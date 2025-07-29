@@ -43,9 +43,9 @@
         <h2>Reservation Details (Admin View)</h2>
         <p><strong>Spot ID:</strong> {{ spot.id }}</p>
         <p><strong>Lot Name:</strong> {{ spot.lot.prime_location_name }}</p>
-        <p><strong>User:</strong> {{ reservation.user.username }}</p>
+        <p><strong>User:</strong> {{ reservation.user.name }}</p>
         <p><strong>Start Time:</strong> {{ reservation.parking_timestamp }}</p>
-        <p><strong>Leaving Time:</strong> {{ reservation.leaving_timestamp }}</p>
+        <p><strong>Leaving Time:</strong> {{ reservation.expected_leaving_timestamp }}</p>
         <p><strong>Cost/hr:</strong> ₹{{ reservation.cost_per_hour }}</p>
 
         <a href="{{ url_for('auth.edit_reservation', reservation_id=reservation.id) }}" class="button">Edit Reservation</a>

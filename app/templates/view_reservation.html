@@ -1,18 +1,124 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Reservation Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 30px;
+        }
+
+        .container {
+            background-color: #fff;
+            max-width: 700px;
+            margin: auto;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        p {
+            font-size: 16px;
+            margin: 10px 0;
+        }
+
+        strong {
+            color: #444;
+        }
+
+        .status {
+            font-weight: bold;
+        }
+
+        .btn-back {
+            display: inline-block;
+            margin-top: 25px;
+            padding: 10px 16px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .btn-back:hover {
+            background-color: #2980b9;
+        }
+
+        .status span {
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        .status .active { background-color: #f1c40f; color: #fff; }
+        .status .released { background-color: #2ecc71; color: #fff; }
+        .status .late { background-color: #e74c3c; color: #fff; }
+
+    </style>
 </head>
 <body>
-    <h2>Reservation Details</h2>
-    <p><strong>Spot ID:</strong> {{ reservation.spot.id }}</p>
-    <p><strong>Lot:</strong> {{ reservation.spot.lot.prime_location_name }}</p>
-    <p><strong>Start Time:</strong> {{ reservation.parking_timestamp }}</p>
-    <p><strong>Leaving Time:</strong> {{ reservation.leaving_timestamp }}</p>
-    <p><strong>Cost/hr:</strong> ₹{{ reservation.cost_per_hour }}</p>
-   <a href="{% if session['role'] == 'admin' %}{{ url_for('auth.admin_dashboard') }}{% else %}{{ url_for('auth.home') }}{% endif %}">
-  Back
-</a>
+    <div class="container">
+        <h2>Reservation Details</h2>
 
+        <p><strong>Reservation ID:</strong> {{ reservation.id }}</p>
+        <p><strong>User:</strong> {{ reservation.user.name }} ({{ reservation.user.email }})</p>
+        <p><strong>Vehicle Number:</strong> {{ reservation.vehicle_number }}</p>
+
+        <p><strong>Spot ID:</strong> {{ reservation.spot.id }}</p>
+        <p><strong>Lot Name:</strong> {{ reservation.spot.lot.prime_location_name }}</p>
+        <p><strong>Lot Address:</strong> {{ reservation.spot.lot.address }}</p>
+        <p><strong>Lot Pin Code:</strong> {{ reservation.spot.lot.pin_code }}</p>
+
+        <p><strong>Start Time:</strong> {{ reservation.parking_timestamp }}</p>
+        <p><strong>Expected Leaving Time:</strong> {{ reservation.expected_leaving_timestamp }}</p>
+
+        <p><strong>Actual Leaving Time:</strong>
+            {% if reservation.actual_leaving_timestamp %}
+                {{ reservation.actual_leaving_timestamp }}
+            {% else %}
+                ⏳ Not yet released
+            {% endif %}
+        </p>
+
+        <p><strong>Cost per Hour:</strong> ₹{{ reservation.cost_per_hour }}</p>
+
+        <p class="status"><strong>Status:</strong>
+            {% if reservation.actual_leaving_timestamp %}
+                {% if reservation.actual_leaving_timestamp <= reservation.expected_leaving_timestamp %}
+                    <span class="released">✅ Released</span>
+                {% else %}
+                    <span class="late">⚠️ Released (Overdue)</span>
+                {% endif %}
+            {% else %}
+                <span class="active">⏳ Active</span>
+            {% endif %}
+        </p>
+
+        <p><strong>Expected Price to Pay:</strong>
+            ₹{{
+                (
+                    (
+                        (reservation.actual_leaving_timestamp if reservation.actual_leaving_timestamp and reservation.actual_leaving_timestamp > reservation.expected_leaving_timestamp
+                        else reservation.expected_leaving_timestamp
+                        ) - reservation.parking_timestamp
+                    ).total_seconds() / 3600
+                ) * reservation.cost_per_hour
+                | round(2)
+            }}
+        </p>
+
+        <a href="{% if session['role'] == 'admin' %}{{ url_for('auth.admin_dashboard') }}{% else %}{{ url_for('auth.home') }}{% endif %}" class="btn-back">
+            ← Back
+        </a>
+    </div>
 </body>
 </html>

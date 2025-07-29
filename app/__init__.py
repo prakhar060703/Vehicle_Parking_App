@@ -29,10 +29,17 @@ def create_app():
         from .models.models import User
         admin = User.query.filter_by(role='admin').first()
         if not admin:
-            default_admin = User(username='admin', password='admin123', role='admin')
+            default_admin = User(
+                name='Admin',
+                email='admin@example.com',
+                password='admin123',  # Consider hashing this in production
+                role='admin',
+                pin_code='000000',
+                address='123 Admin Street, Admin City, 999999'
+            )
             db.session.add(default_admin)
             db.session.commit()
-            print("✔️ Default admin user created: username='admin', password='admin123'")
+            
 
 
     # Flask uses something called an "application context" to keep track of which app is currently running.
