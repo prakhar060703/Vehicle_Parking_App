@@ -158,14 +158,24 @@ def admin_dashboard():
     lots = ParkingLot.query.filter_by(is_deleted=False).all()
     users = User.query.filter_by(role='user').all()
     reservations = Reservation.query.all()
+
     
-    return render_template(
-        'admin_dashboard.html',
-        lots=lots,
-        users=users,
-        reservations=reservations,
-       
-    )
+
+    lot_data = []
+    for lot in lots:
+        total = len(lot.spots)
+        occupied = sum(1 for spot in lot.spots if spot.status == 'O')
+        available = total - occupied
+        lot_data.append({
+            "name": lot.prime_location_name,
+            "available": available,
+            "occupied": occupied
+        })
+
+    return render_template("admin_dashboard.html", lots=lots, users=users, reservations=reservations, lot_data=lot_data)
+
+    
+    
 
 
 @auth_bp.route('/create_lot', methods=['GET', 'POST'])
@@ -358,4 +368,50 @@ def delete_lot(lot_id):
     db.session.commit()
     flash('✅ Parking lot marked as deleted.', 'success')
     return redirect(url_for('auth.admin_dashboard'))
+
+@auth_bp.route('/edit_profile', methods=['GET', 'POST'])
+def edit_profile():
+    user_id = session.get('user_id')
+    user = User.query.get_or_404(user_id)
+
+    if request.method == 'POST':
+        # Get form inputs
+        name = request.form.get('name')
+        email = request.form.get('email')
+        pin_code = request.form.get('pin_code')
+        address = request.form.get('address')
+        current_password = request.form.get('current_password')
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
+
+        # Validate required fields
+        if not all([name, email, pin_code, address, current_password]):
+            flash('All profile fields and current password are required.', 'error')
+            return render_template('edit_profile.html', user=user)
+
+        # Validate current password
+        if user.password != current_password:
+            flash('Current password is incorrect.', 'error')
+            return render_template('edit_profile.html', user=user)
+
+        # If new password is given, check confirmation
+        if new_password or confirm_password:
+            if new_password != confirm_password:
+                flash('New passwords do not match.', 'error')
+                return render_template('edit_profile.html', user=user)
+            user.password = new_password  # Update password
+
+        # Update other fields
+        user.name = name
+        user.email = email
+        user.pin_code = pin_code
+        user.address = address
+
+        db.session.commit()
+        flash('Profile updated successfully!', 'success')
+
+        session.clear()  # logout for security
+        return redirect(url_for('auth.login'))
+
+    return render_template('edit_profile.html', user=user)
 

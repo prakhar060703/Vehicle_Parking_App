@@ -27,7 +27,9 @@
         <a href="{{ url_for('auth.create_lot') }}" class="btn btn-primary"
           >+ Add Parking Lot</a
         >
+        <a href="{{ url_for('auth.edit_profile') }}" class="btn btn-danger">Edit Profile</a>
         <a href="{{ url_for('auth.logout') }}" class="btn btn-danger">Logout</a>
+        
       </div>
 
       <div class="dashboard-content">
@@ -188,13 +190,23 @@
         <!-- Section: Summary -->
         <section class="card">
           <h2>Summary</h2>
-          <script id="summary-data" type="application/json">
-            {
-              "lots": {{ lots|length }},
-              "users": {{ users|length }},
-              "reservations": {{ reservations|length }}
-            }
-          </script>
+            <script id="summary-data" type="application/json">
+              {
+                "lots": {{ lots|length }},
+                "users": {{ users|length }},
+                "reservations": {{ reservations|length }},
+                "spot_summary": [
+                  {% for lot in lots %}
+                    {
+                      "lot": "Lot {{ loop.index }}",
+                      "available": {{ lot.spots | selectattr('status', 'equalto', 'A') | list | length }},
+                      "occupied": {{ lot.spots | selectattr('status', 'equalto', 'O') | list | length }}
+                    }{% if not loop.last %},{% endif %}
+                  {% endfor %}
+                ]
+              }
+            </script>
+          
           <!-- Chart Canvas -->
           <canvas id="summaryChart" width="300" height="300"></canvas>
         </section>

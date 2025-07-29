@@ -1,36 +1,53 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const jsonData = document.getElementById("summary-data");
-  if (!jsonData) return;
+document.addEventListener("DOMContentLoaded", function () {
+  const dataElement = document.getElementById("summary-data");
+  if (!dataElement) return;
 
-  const { lots, users, reservations } = JSON.parse(jsonData.textContent);
+  const rawData = JSON.parse(dataElement.textContent);
 
-  renderSummaryChart(lots, users, reservations);
-});
+  const labels = rawData.spot_summary.map(item => item.lot);
+  const availableData = rawData.spot_summary.map(item => item.available);
+  const occupiedData = rawData.spot_summary.map(item => item.occupied);
 
-function renderSummaryChart(lotCount, userCount, reservationCount) {
   const ctx = document.getElementById("summaryChart").getContext("2d");
 
   new Chart(ctx, {
-    type: 'pie',
+    type: "bar",
     data: {
-      labels: ['Parking Lots', 'Users', 'Reservations'],
-      datasets: [{
-        data: [lotCount, userCount, reservationCount],
-        backgroundColor: ['#4caf50', '#2196f3', '#ff9800'],
-        borderWidth: 1
-      }]
+      labels: labels,
+      datasets: [
+        {
+          label: "Available Spots",
+          data: availableData,
+          backgroundColor: "green"
+        },
+        {
+          label: "Occupied Spots",
+          data: occupiedData,
+          backgroundColor: "red"
+        }
+      ]
     },
     options: {
-      responsive: false,
+      responsive: true,
       plugins: {
-        legend: {
-          position: 'bottom'
-        },
         title: {
           display: true,
-          text: 'System Summary'
+          text: "Parking Spot Status per Lot"
+        }
+      },
+      scales: {
+        x: {
+          stacked: true
+        },
+        y: {
+          beginAtZero: true,
+          stacked: true,
+          title: {
+            display: true,
+            text: "Number of Spots"
+          }
         }
       }
     }
   });
-}
+});
