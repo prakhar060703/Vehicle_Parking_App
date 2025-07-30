@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 from flask import Blueprint, render_template, request, redirect, session, url_for, flash
 from .. import db
 from ..models.models import User, ParkingLot, ParkingSpot, Reservation  # Make sure these models exist
@@ -84,71 +85,6 @@ def home():
     )
 
 
-
-
-@auth_bp.route('/view_reservation/<int:reservation_id>')
-def view_reservation(reservation_id):
-    reservation = Reservation.query.get_or_404(reservation_id)
-
-    # Authorization check
-    if reservation.user_id != session.get('user_id') and session.get('role') != 'admin':
-        flash("Access denied.")
-        return redirect(url_for('auth.home'))
-
-    # Calculate reserved hours
-    
-
-    return render_template(
-        'view_reservation.html',
-        reservation=reservation,
-        
-    )
-
-
-@auth_bp.route('/delete_reservation/<int:reservation_id>')
-def delete_reservation(reservation_id):
-    reservation = Reservation.query.get_or_404(reservation_id)
-
-    # Authorization check
-    if reservation.user_id != session.get('user_id') and session.get('role') != 'admin':
-        flash("Not authorized to complete this reservation.")
-        return redirect(url_for('auth.home'))
-
-    # Prevent re-completing
-    if reservation.actual_leaving_timestamp:
-        flash("Reservation already marked as completed.")
-        if session.get('role') == 'admin':
-            return redirect(url_for('auth.admin_dashboard'))
-        return redirect(url_for('auth.home'))
-
-    # Mark actual leaving time
-    reservation.actual_leaving_timestamp = datetime.utcnow()
-
-    # Make the spot available again
-    reservation.spot.status = 'A'
-
-    db.session.commit()
-    flash("Reservation completed and spot marked available.")
-    
-    # Redirect based on role
-    if session.get('role') == 'admin':
-        return redirect(url_for('auth.admin_dashboard'))
-    return redirect(url_for('auth.home'))
-
-
-
-
-
-
-
-@auth_bp.route('/logout')
-def logout():
-    session.clear()
-    return redirect(url_for('auth.login'))
-
-
-
-
 # --- Admin Dashboard ---
 @auth_bp.route('/admin/dashboard')
 def admin_dashboard():
@@ -174,46 +110,6 @@ def admin_dashboard():
 
     return render_template("admin_dashboard.html", lots=lots, users=users, reservations=reservations, lot_data=lot_data)
 
-    
-    
-
-
-@auth_bp.route('/create_lot', methods=['GET', 'POST'])
-def create_lot():
-    if 'role' not in session or session['role'] != 'admin':
-        flash("Admin access required.")
-        return redirect(url_for('auth.login'))
-
-    if request.method == 'POST':
-        name = request.form['name']
-        price = float(request.form['price'])
-        address = request.form['address']
-        pin_code = request.form['pin_code']
-        max_spots = int(request.form['max_spots'])
-
-        # Create the parking lot
-        lot = ParkingLot(
-            prime_location_name=name,
-            price=price,
-            address=address,
-            pin_code=pin_code,
-            max_spots=max_spots
-        )
-        db.session.add(lot)
-        db.session.commit()  # Commit once to get the lot.id for spots
-
-        # Create parking spots
-        for _ in range(max_spots):
-            spot = ParkingSpot(lot_id=lot.id, status='A')
-            db.session.add(spot)
-
-        db.session.commit()
-        flash(" Parking lot and spots created successfully!")
-        return redirect(url_for('auth.admin_dashboard'))
-
-    return render_template('create_lot.html')
-
-
 
 @auth_bp.route('/lot/<int:lot_id>/spots')
 def view_spots(lot_id):
@@ -224,6 +120,7 @@ def view_spots(lot_id):
 
     spots = ParkingSpot.query.filter_by(lot_id=lot.id).all()
     return render_template('view_spots.html', lot=lot, spots=spots)
+
 
 @auth_bp.route('/reserve/<int:spot_id>', methods=['GET', 'POST'])
 def reserve_spot(spot_id):
@@ -304,19 +201,136 @@ def edit_reservation(reservation_id):
 def edit_lot(lot_id):
     lot = ParkingLot.query.filter_by(id=lot_id, is_deleted=False).first_or_404()
 
-
     if request.method == 'POST':
+        # Get form data
+        new_max_spots = int(request.form['max_spots'])
+
+        # Check current number of spots
+        current_spots = ParkingSpot.query.filter_by(lot_id=lot.id).count()
+
+        if new_max_spots < current_spots:
+            flash(f'Cannot reduce max spots below existing spots ({current_spots}).', 'danger')
+            return redirect(url_for('auth.admin_dashboard'))
+
+        # Update lot details
         lot.prime_location_name = request.form['prime_location_name']
         lot.address = request.form['address']
         lot.pin_code = request.form['pin_code']
         lot.price = float(request.form['price'])
-        lot.max_spots = int(request.form['max_spots'])
+        lot.max_spots = new_max_spots
+
+        # Add new spots if needed
+        if new_max_spots > current_spots:
+            for _ in range(new_max_spots - current_spots):
+                new_spot = ParkingSpot(lot_id=lot.id, status='A')
+                db.session.add(new_spot)
 
         db.session.commit()
         flash('Parking lot updated successfully!', 'success')
         return redirect(url_for('auth.admin_dashboard'))
 
     return render_template('edit_lot.html', lot=lot)
+
+    
+
+@auth_bp.route('/view_reservation/<int:reservation_id>')
+def view_reservation(reservation_id):
+    reservation = Reservation.query.get_or_404(reservation_id)
+
+    # Authorization check
+    if reservation.user_id != session.get('user_id') and session.get('role') != 'admin':
+        flash("Access denied.")
+        return redirect(url_for('auth.home'))
+
+    # Calculate reserved hours
+    
+
+    return render_template(
+        'view_reservation.html',
+        reservation=reservation,
+        
+    )
+
+
+@auth_bp.route('/delete_reservation/<int:reservation_id>')
+def delete_reservation(reservation_id):
+    reservation = Reservation.query.get_or_404(reservation_id)
+
+    # Authorization check
+    if reservation.user_id != session.get('user_id') and session.get('role') != 'admin':
+        flash("Not authorized to complete this reservation.")
+        return redirect(url_for('auth.home'))
+
+    # Prevent re-completing
+    if reservation.actual_leaving_timestamp:
+        flash("Reservation already marked as completed.")
+        if session.get('role') == 'admin':
+            return redirect(url_for('auth.admin_dashboard'))
+        return redirect(url_for('auth.home'))
+
+    # Mark actual leaving time
+    now_ist = datetime.now(ZoneInfo("Asia/Kolkata"))
+
+    # Strip seconds and microseconds
+    now_str = now_ist.strftime("%Y-%m-%dT%H:%M")  # format like <input type="datetime-local">
+    stripped_now = datetime.strptime(now_str, "%Y-%m-%dT%H:%M")
+
+    # Assign to reservation
+    reservation.actual_leaving_timestamp = stripped_now
+
+    # Make the spot available again
+    reservation.spot.status = 'A'
+
+    db.session.commit()
+    flash("Reservation completed and spot marked available.")
+    
+    # Redirect based on role
+    if session.get('role') == 'admin':
+        return redirect(url_for('auth.admin_dashboard'))
+    return redirect(url_for('auth.home'))
+
+
+@auth_bp.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('auth.login'))
+
+
+
+@auth_bp.route('/create_lot', methods=['GET', 'POST'])
+def create_lot():
+    if 'role' not in session or session['role'] != 'admin':
+        flash("Admin access required.")
+        return redirect(url_for('auth.login'))
+
+    if request.method == 'POST':
+        name = request.form['name']
+        price = float(request.form['price'])
+        address = request.form['address']
+        pin_code = request.form['pin_code']
+        max_spots = int(request.form['max_spots'])
+
+        # Create the parking lot
+        lot = ParkingLot(
+            prime_location_name=name,
+            price=price,
+            address=address,
+            pin_code=pin_code,
+            max_spots=max_spots
+        )
+        db.session.add(lot)
+        db.session.commit()  # Commit once to get the lot.id for spots
+
+        # Create parking spots
+        for _ in range(max_spots):
+            spot = ParkingSpot(lot_id=lot.id, status='A')
+            db.session.add(spot)
+
+        db.session.commit()
+        flash(" Parking lot and spots created successfully!")
+        return redirect(url_for('auth.admin_dashboard'))
+
+    return render_template('create_lot.html')
 
 
 @auth_bp.route('/search', methods=['GET', 'POST'])
